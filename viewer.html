@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Flipbook Viewer</title>
 
-  <!-- Local PageFlip library -->
-  <script src="assets/js/page-flip.browser.js"></script>
+  <!-- ✅ Use relative path for GitHub Pages -->
+  <script src="./assets/js/page-flip.browser.js"></script>
 
   <style>
     html, body {
@@ -76,17 +75,27 @@
 
       for (let i = 1; i <= 60; i++) {
         const pageNum = i.toString().padStart(2, "0");
-        const imgPath = `pages/page${pageNum}.jpg`;
+
+        // ✅ Use relative path that works on GitHub Pages
+        const jpgPath = `./pages/page${pageNum}.jpg`;
+        const pngPath = `./pages/page${pageNum}.png`;
 
         try {
-          const res = await fetch(imgPath, { method: "HEAD" });
-          if (!res.ok) {
-            console.log(`⛔ No image at ${imgPath}`);
-            break;
+          let res = await fetch(jpgPath, { method: "HEAD" });
+
+          if (res.ok) {
+            images.push(jpgPath);
+          } else {
+            res = await fetch(pngPath, { method: "HEAD" });
+            if (res.ok) {
+              images.push(pngPath);
+            } else {
+              console.log(`⛔ No image at page${pageNum}.jpg or .png`);
+              break;
+            }
           }
-          images.push(imgPath);
         } catch (e) {
-          console.error("Error loading", imgPath);
+          console.error("Error loading", pageNum, e);
           break;
         }
       }
