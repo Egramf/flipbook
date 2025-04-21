@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flipbook Viewer</title>
+
+  <!-- Local PageFlip library -->
+  <script src="assets/js/page-flip.browser.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #f0f0f0;
+      overflow: hidden;
+    }
+
+    #flipbook {
+      width: 100%;
+      height: 100vh;
+      transform-origin: top left;
+    }
+
+    .controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .controls button {
+      margin: 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="controls">
+    <button onclick="flipbook && flipbook.flipPrev()">⟵</button>
+    <button onclick="flipbook && flipbook.flipNext()">⟶</button>
+    <button onclick="zoomIn()">Zoom In</button>
+    <button onclick="zoomOut()">Zoom Out</button>
+  </div>
+
+  <div id="flipbook"></div>
+
+  <script>
+    let flipbook;
+    let zoom = 1;
+
+    async function loadFlipbook() {
+      if (typeof window.PageFlip === "undefined") {
+        console.error("❌ PageFlip library failed to load.");
+        return;
+      }
+
+      flipbook = new window.PageFlip(document.getElementById("flipbook"), {
+        width: 600,
+        height: 800,
+        size: "stretch",
+        minWidth: 315,
+        maxWidth: 2000,
+        minHeight: 420,
+        maxHeight: 2700,
+        maxShadowOpacity: 0.5,
+        showCover: true,
+        mobileScrollSupport: false
+      });
+
+      const images = [];
+
+      for (let i = 1; i <= 60; i++) {
+        const pageNum = i.toString().padStart(2, "0");
+        const imgPath = `pages/page${pageNum}.jpg`;
+
+        try {
+          const res = await fetch(imgPath, { method: "HEAD" });
+          if (!res.ok) {
+            console.log(`⛔ No image at ${imgPath}`);
+            break;
+          }
+          images.push(imgPath);
+        } catch (e) {
+          console.error("Error loading", imgPath);
+          break;
+        }
+      }
+
+      if (images.length > 0) {
+        flipbook.loadFromImages(images);
+      } else {
+        alert("No images found in pages/ folder.");
+      }
+    }
+
+    function zoomIn() {
+      zoom = Math.min(2, zoom + 0.1);
+      document.getElementById("flipbook").style.transform = `scale(${zoom})`;
+    }
+
+    function zoomOut() {
+      zoom = Math.max(0.5, zoom - 0.1);
+      document.getElementById("flipbook").style.transform = `scale(${zoom})`;
+    }
+
+    window.addEventListener("DOMContentLoaded", loadFlipbook);
+  </script>
+</body>
+</html>
