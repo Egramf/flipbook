@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <title>Flipbook Viewer</title>
 
-  <!-- ✅ Use relative path for GitHub Pages -->
-  <script src="./assets/js/page-flip.browser.js"></script>
+  <!-- Load the PageFlip library -->
+  <script src="assets/js/page-flip.browser.js"></script>
 
   <style>
     html, body {
@@ -75,35 +75,35 @@
 
       for (let i = 1; i <= 60; i++) {
         const pageNum = i.toString().padStart(2, "0");
-
-        // ✅ Use relative path that works on GitHub Pages
-        const jpgPath = `./pages/page${pageNum}.jpg`;
-        const pngPath = `./pages/page${pageNum}.png`;
+        const jpgPath = `pages/page${pageNum}.jpg`;
+        const pngPath = `pages/page${pageNum}.png`;
 
         try {
-          let res = await fetch(jpgPath, { method: "HEAD" });
-
-          if (res.ok) {
+          const resJpg = await fetch(jpgPath, { method: "HEAD" });
+          if (resJpg.ok) {
             images.push(jpgPath);
-          } else {
-            res = await fetch(pngPath, { method: "HEAD" });
-            if (res.ok) {
-              images.push(pngPath);
-            } else {
-              console.log(`⛔ No image at page${pageNum}.jpg or .png`);
-              break;
-            }
+            continue;
           }
+
+          const resPng = await fetch(pngPath, { method: "HEAD" });
+          if (resPng.ok) {
+            images.push(pngPath);
+            continue;
+          }
+
+          console.log(`⛔ No image at page${pageNum}.jpg or .png`);
+          break;
         } catch (e) {
-          console.error("Error loading", pageNum, e);
+          console.error("Error checking image:", e);
           break;
         }
       }
 
       if (images.length > 0) {
+        console.log("✅ Images loaded:", images);
         flipbook.loadFromImages(images);
       } else {
-        alert("No images found in pages/ folder.");
+        alert("No pages found in the /pages folder.");
       }
     }
 
