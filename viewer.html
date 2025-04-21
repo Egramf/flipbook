@@ -3,62 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <title>Flipbook Viewer</title>
-
-  <!-- Load the PageFlip library -->
   <script src="assets/js/page-flip.browser.js"></script>
-
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: #f0f0f0;
+      background: #eaeaea;
       overflow: hidden;
     }
 
     #flipbook {
       width: 100%;
       height: 100vh;
-      transform-origin: top left;
     }
 
     .controls {
       position: absolute;
       top: 10px;
       left: 10px;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.8);
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
       padding: 10px;
       border-radius: 8px;
     }
 
     .controls button {
-      margin: 0 5px;
+      margin-right: 5px;
     }
   </style>
 </head>
 <body>
 
   <div class="controls">
-    <button onclick="flipbook && flipbook.flipPrev()">⟵</button>
-    <button onclick="flipbook && flipbook.flipNext()">⟶</button>
-    <button onclick="zoomIn()">Zoom In</button>
-    <button onclick="zoomOut()">Zoom Out</button>
+    <button onclick="flipbook.flipPrev()">⟵ Prev</button>
+    <button onclick="flipbook.flipNext()">Next ⟶</button>
   </div>
 
   <div id="flipbook"></div>
 
   <script>
     let flipbook;
-    let zoom = 1;
 
-    function loadFlipbook() {
-      if (typeof window.PageFlip === "undefined") {
+    window.addEventListener("DOMContentLoaded", () => {
+      if (!window.PageFlip) {
         console.error("❌ PageFlip library failed to load.");
         return;
       }
 
-      flipbook = new window.PageFlip(document.getElementById("flipbook"), {
+      flipbook = new PageFlip(document.getElementById("flipbook"), {
         width: 600,
         height: 800,
         size: "stretch",
@@ -66,31 +59,20 @@
         maxWidth: 2000,
         minHeight: 420,
         maxHeight: 2700,
-        maxShadowOpacity: 0.5,
         showCover: true,
+        maxShadowOpacity: 0.5,
         mobileScrollSupport: false
       });
 
       const images = [];
       for (let i = 1; i <= 24; i++) {
-        const pageNum = i.toString().padStart(2, "0");
-        images.push(`pages/page${pageNum}.jpg`);
+        const page = i.toString().padStart(2, "0");
+        images.push(`pages/page${page}.jpg`);
       }
 
+      console.log("✅ Loading images:", images);
       flipbook.loadFromImages(images);
-    }
-
-    function zoomIn() {
-      zoom = Math.min(2, zoom + 0.1);
-      document.getElementById("flipbook").style.transform = `scale(${zoom})`;
-    }
-
-    function zoomOut() {
-      zoom = Math.max(0.5, zoom - 0.1);
-      document.getElementById("flipbook").style.transform = `scale(${zoom})`;
-    }
-
-    window.addEventListener("DOMContentLoaded", loadFlipbook);
+    });
   </script>
 </body>
 </html>
