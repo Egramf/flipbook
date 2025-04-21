@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Flipbook Viewer</title>
-  <script src="https://egramf.github.io/flipbook/assets/js/page-flip.browser.js"></script>
+
+  <!-- ✅ Load the local PageFlip library (with cache busting) -->
+  <script src="/assets/js/page-flip.browser.js?v=1.0"></script>
+
   <style>
     html, body {
       margin: 0;
@@ -11,34 +14,52 @@
       height: 100%;
       background: #f0f0f0;
       overflow: hidden;
+      font-family: sans-serif;
     }
+
     #flipbook {
       width: 100%;
       height: 100vh;
       transform-origin: top left;
     }
+
     .controls {
       position: absolute;
       top: 10px;
       left: 10px;
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       padding: 10px;
       border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     .controls button {
       margin: 0 5px;
+      padding: 5px 10px;
+      border: none;
+      background: #333;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background: #555;
     }
   </style>
 </head>
 <body>
+
   <div class="controls">
-    <button onclick="flipbook && flipbook.flipPrev()">⟵</button>
-    <button onclick="flipbook && flipbook.flipNext()">⟶</button>
+    <button onclick="flipbook && flipbook.flipPrev()">⟵ Prev</button>
+    <button onclick="flipbook && flipbook.flipNext()">Next ⟶</button>
     <button onclick="zoomIn()">Zoom In</button>
     <button onclick="zoomOut()">Zoom Out</button>
   </div>
+
   <div id="flipbook"></div>
+
   <script>
     let flipbook;
     let zoom = 1;
@@ -66,18 +87,32 @@
 
       for (let i = 1; i <= 60; i++) {
         const pageNum = i.toString().padStart(2, "0");
-        for (const ext of ['jpg', 'png']) {
-          const imgPath = `pages/page${pageNum}.${ext}`;
-          try {
-            const res = await fetch(imgPath, { method: "HEAD" });
-            if (res.ok) {
-              images.push(imgPath);
-              break;
-            }
-          } catch (e) {
-            console.error("Error loading", imgPath);
+
+        const jpg = `pages/page${pageNum}.jpg`;
+        const png = `pages/page${pageNum}.png`;
+
+        let exists = false;
+
+        // Prefer .jpg, fallback to .png
+        try {
+          const res = await fetch(jpg, { method: "HEAD" });
+          if (res.ok) {
+            images.push(jpg);
+            exists = true;
           }
+        } catch {}
+
+        if (!exists) {
+          try {
+            const res = await fetch(png, { method: "HEAD" });
+            if (res.ok) {
+              images.push(png);
+              exists = true;
+            }
+          } catch {}
         }
+
+        if (!exists) break; // stop when no more pages found
       }
 
       if (images.length > 0) {
